@@ -18,7 +18,7 @@ export const SingleColumnChildren: React.FC<ExternalSingleColumnProps> = ({
       ref={(ref) => {
         if (ref) connect(ref)
       }}
-      className='py-2 w-full bg-red-200'
+      className='w-full'
     >
       {children ?? <div className='m-2 bg-gray-200 p-2'>Single Column</div>}
     </div>
