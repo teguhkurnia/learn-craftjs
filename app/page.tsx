@@ -15,8 +15,8 @@ import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch'
 
 export default function Home() {
   return (
-    <div className='h-screen w-screen'>
-      {/* <Navbar /> */}
+    <div className='h-screen w-screen overflow-hidden'>
+      <Navbar />
       <Editor
         resolver={{
           Text,
