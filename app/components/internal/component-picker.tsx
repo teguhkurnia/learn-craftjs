@@ -1,11 +1,62 @@
 import { Button } from '@/components/ui/button'
-import React from 'react'
+import { Nodes, useEditor } from '@craftjs/core'
 import { Columns2, Square, Type } from 'lucide-react'
-import { Element, useEditor } from '@craftjs/core'
-import ExternalText from '../external/text'
-import ExternalContainer from '../external/container'
-import ExternalSingleColumn from '../external/single-column'
+import { useEffect } from 'react'
 import DoubleColumn from '../external/double-clumn'
+import ExternalSingleColumn from '../external/single-column'
+import ExternalText from '../external/text'
+
+type TreeNode = {
+  [key: string]: any
+  children: TreeNode[]
+}
+
+function buildTree(flatNodes: Nodes, nodeId = 'ROOT'): TreeNode {
+  const node = { ...flatNodes[nodeId] }
+
+  if (!node.dom) {
+    return {
+      ...node,
+      children: [],
+    }
+  }
+
+  let children: TreeNode[] = []
+
+  if (node.data?.linkedNodes) {
+    const childIds = Object.values(node.data.linkedNodes)
+    console.log('childIds', childIds)
+    if (childIds.length > 0) {
+      children = Object.values(node.data.linkedNodes).map((childId) => {
+        return buildTree(flatNodes, childId)
+      })
+    }
+  }
+
+  if (node.data?.nodes) {
+    if (node.data.nodes.length > 0) {
+      children = Array.isArray(node.data.nodes)
+        ? node.data.nodes.map((childId) => {
+            return buildTree(flatNodes, childId)
+          })
+        : []
+    }
+  }
+
+  // if (node.data?.linkedNodes) {
+  //   const childIds = Object.values(node.data.linkedNodes)
+  //   if (childIds.length > 0) {
+  //     children = Object.values(node.data.linkedNodes).map((childId) => {
+  //       return buildTree(flatNodes, childId)
+  //     })
+  //   }
+  // }
+
+  return {
+    ...node,
+    children,
+  }
+}
 
 const components = [
   {
@@ -26,7 +77,17 @@ const components = [
 ]
 
 const ComponentPicker = () => {
-  const { connectors, query } = useEditor()
+  const { connectors, query, store, state } = useEditor((state) => ({
+    state,
+  }))
+
+  useEffect(() => {
+    console.log('State:', state.nodes)
+    console.log(buildTree(state.nodes))
+
+    return () => {}
+  }, [state])
+
   return (
     <div className='border-r p-2.5 flex flex-col gap-2'>
       {components.map((component) => (
@@ -40,6 +101,11 @@ const ComponentPicker = () => {
           {component.icon}
         </Button>
       ))}
+
+      <p>Nodes</p>
+      <div className='flex flex-col gap-2'>
+        {/* {buildTree(state.nodes)}} */}
+      </div>
     </div>
   )
 }
