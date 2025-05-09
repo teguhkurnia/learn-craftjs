@@ -1,19 +1,20 @@
 'use client'
-import { Editor, Element, Frame, useEditor } from '@craftjs/core'
-import ComponentPicker from './components/internal/component-picker'
-import Navbar from './components/internal/navbar'
-import Text from './components/external/text'
+import { Editor, Element, Frame } from '@craftjs/core'
 import Container from './components/external/container'
+import DoubleColumn from './components/external/double-clumn'
+import Grid, { GridContainer } from './components/external/grid'
 import SingleColumn, {
   SingleColumnChildren,
 } from './components/external/single-column'
-import DoubleColumn from './components/external/double-clumn'
+import Text from './components/external/text'
+import ComponentPicker from './components/internal/component-picker'
+import Navbar from './components/internal/navbar'
 import SettingsPanel from './components/internal/settings-panel'
-import { Zoom } from '@react-zoom/react-zoom-in-out'
-import { useEffect, useRef } from 'react'
-import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch'
+import useScreenState from './stores/screen-state'
+import { match } from 'ts-pattern'
 
 export default function Home() {
+  const { currentScreen } = useScreenState()
   return (
     <div className='h-screen w-screen overflow-hidden'>
       <Navbar />
@@ -24,30 +25,42 @@ export default function Home() {
           SingleColumn,
           SingleColumnChildren,
           DoubleColumn,
+          Grid,
+          GridContainer,
         }}
         onNodesChange={(q) => {
-          console.log('Nodes changed', q.serialize())
+          console.log('Nodes changed', q.getNodes())
         }}
       >
         <div className='h-full flex'>
           <ComponentPicker />
-          {/* 
-          <TransformWrapper initialScale={0.9} centerOnInit minScale={0.4}>
-            <TransformComponent
-              wrapperStyle={{ width: '100%', height: '100%' }}
-            > */}
-          <div className='bg-white flex-1 relative overflow-auto container'>
-            <Frame
-              data={`{"ROOT":{"type":{"resolvedName":"Container"},"isCanvas":true,"props":{"className":"h-full"},"displayName":"Container","custom":{},"hidden":false,"nodes":["PynkEc82DB","0bjGLVnUAO"],"linkedNodes":{}},"PynkEc82DB":{"type":{"resolvedName":"Text"},"isCanvas":false,"props":{"text":"Hello World","fontSize":12},"displayName":"Text","custom":{},"parent":"ROOT","hidden":false,"nodes":[],"linkedNodes":{}},"0bjGLVnUAO":{"type":{"resolvedName":"Text"},"isCanvas":false,"props":{"text":"Hello World 2","fontSize":24},"displayName":"Text","custom":{},"parent":"ROOT","hidden":false,"nodes":[],"linkedNodes":{}}}`}
+
+          <div className='flex-1 flex justify-center overflow-auto'>
+            <div
+              id='root'
+              className='bg-white relative transition-all duration-300 border'
+              style={{
+                height: 720,
+                width: match(currentScreen)
+                  .with('desktop', () => 1440)
+                  .with('tablet', () => 768)
+                  .with('mobile', () => 375)
+                  .exhaustive(),
+                scale: 0.95,
+              }}
             >
-              {/* <Element is={Container} canvas className='h-full'>
-                <Text text='Hello World' fontSize={12} />
-                <Text text='Hello World 2' fontSize={24} />
-              </Element> */}
-            </Frame>
+              <div className='absolute -top-[25px] left-0 px-3 py-1 text-xs border rounded-t-lg'>
+                Page 1
+              </div>
+              <Frame>
+                <Element is={Container} canvas className='h-full'>
+                  <Text text='Hello World' fontSize={12} />
+                  <Text text='Hello World 2' fontSize={24} />
+                  <Grid></Grid>
+                </Element>
+              </Frame>
+            </div>
           </div>
-          {/* </TransformComponent>
-          </TransformWrapper> */}
 
           <SettingsPanel />
         </div>
